@@ -26,6 +26,25 @@
     }
   }
 
+  function right_case($n, $var1, $var2, $var3) {
+    $digit = substr($n, -1);
+    if(substr($n,-2) >10 AND substr($n,-2)<19) {
+      return $var3;
+    }
+    switch ($digit) {
+      case 1: 
+        return $var1;
+        break;
+      case 2:
+      case 3:
+      case 4:
+        return $var2;
+        break;
+      default:
+        return $var3;
+    }
+    
+  }
 ?>
 <html>
 <head>
@@ -40,23 +59,17 @@
    <div id="wrapper">
    
          <!-- Begin Header -->
-         <div id="header" align=center>
-		 
-		       <img src='ani.gif' id="ani">		 
-			   
-		 </div>
-		 <!-- End Header -->
-		 
-		 <!-- Begin Navigation -->
-         <div id="navigation">
+  <div id="header">
+    <img src='ani.gif' id="ani">		 
+  </div>
+	 
+  <div id="navigation">
 		 
 		       This is the Navigation		 
 			   
-		 </div>
-		 <!-- End Navigation -->
-		 
-		 <!-- Begin Left Column -->
-		 <div id="leftcolumn">
+  </div>
+	
+	<div id="leftcolumn">
 <?php
   if (isset($_GET['cat'])) { //need to advance selected category
     //firstly lets check the existance of given category
@@ -173,7 +186,37 @@
         }
       }
     } else { //only category has been specified - need to show smth
-      echo "I know! You have choosen the category. Here will be smth";
+      $res = mysql_safe("SELECT category.id, category.name
+                         FROM category
+                         WHERE id = ?", array($_GET['cat']));
+      if (mysql_num_rows($res)>0) {
+        $row = mysql_fetch_array($res);
+        echo "<span id='groupname'>".$row['name']."</span><br>";
+        $res1 = mysql_safe("SELECT id, name
+                         FROM subcat
+                         WHERE id_cat = ?", array($row['id']));
+        while($row_sub = mysql_fetch_array($res1)) {
+          echo $row_sub['name']."<br>";
+          $res2 = mysql_safe("SELECT id, id_subcat, name
+                              FROM items
+                              WHERE (id_subcat = ?)", array($row_sub['id']));
+          $counter = 0;
+          $overall = mysql_num_rows($res2);
+          while(($row_item = mysql_fetch_array($res2)) AND ($counter++ < 3)){
+            echo "<a href='index.php?cat=".$row['id']
+                                  ."&sub=".$row_sub['id']
+                                  ."&item=".$row_item['id']."' class='submenu'>"
+                                  .$row_item['name']."</a><br>";
+          }
+          if($overall>3){
+            echo "<a href='index.php?cat=".$row['id']
+                                  ."&sub=".$row_sub['id']."' class='submenu'>"
+                                  .right_case($overall, "весь ", "все ", "все ").$overall
+                                  .right_case($overall, " товар", " товара", " товаров")
+                                  ." группы >></a><br>";
+          }
+        }
+      }
     }
   } else {
     $res = mysql_safe("SELECT category.id, category.name, subcat.id as sid, subcat.name as sname FROM category, subcat WHERE category.id=subcat.id_cat ORDER BY category.name, subcat.name");
