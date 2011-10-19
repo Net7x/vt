@@ -82,6 +82,22 @@ a.submenu:visited {text-decoration:none;color: #77A;}
 a.submenu:hover {text-decoration:underline;color: #77A;}
 a.submenu:active {text-decoration:none;color: #77A;}
 
+.submenu_nomargin {
+ position: absolute;
+ width:310px;
+ overflow: hidden;
+ margin: 0 2px 0 0px;
+ line-height: 14px;
+ vertical-align: middle;
+ font-size: 10px;
+ font-weight:normal;
+ color: #77A;
+}
+a.submenu_nomargin:link {text-decoration:none;color: #77A;}
+a.submenu_nomargin:visited {text-decoration:none;color: #77A;}
+a.submenu_nomargin:hover {text-decoration:underline;color: #77A;}
+a.submenu_nomargin:active {text-decoration:none;color: #77A;}
+
 .item {
  margin: 0 2px 0 10px;
  line-height: 16px;
@@ -170,4 +186,8 @@ a.pointer:active {text-decoration:none;color: #55A;}
   font-size: 14px;
   font-weight: bold;
   color: #005;
+}
+
+.nowrap {
+  white-space: nowrap;
 }

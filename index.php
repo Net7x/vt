@@ -192,11 +192,22 @@
       if (mysql_num_rows($res)>0) {
         $row = mysql_fetch_array($res);
         echo "<span id='groupname'>".$row['name']."</span><br>";
-        $res1 = mysql_safe("SELECT id, name
+        $res1 = mysql_safe("SELECT id, id_cat, name
                          FROM subcat
                          WHERE id_cat = ?", array($row['id']));
+        echo "<table width=100% cellspacing=10px class='nowrap'>";
+        $col = 5;
         while($row_sub = mysql_fetch_array($res1)) {
-          echo $row_sub['name']."<br>";
+          if($col > 1) {
+            if($col < 5) {
+              echo "</td></tr>";
+            }
+            $col = 0;
+            echo "<tr valign='top'><td width=300px>";
+          } else {
+            echo "</td><td width=300px>";
+          }
+          echo "<a href='index.php?cat=".$row_sub['id_cat']."&sub=".$row_sub['id']."' class='menuitem'>".$row_sub['name']."</a><br>";
           $res2 = mysql_safe("SELECT id, id_subcat, name
                               FROM items
                               WHERE (id_subcat = ?)", array($row_sub['id']));
@@ -205,17 +216,20 @@
           while(($row_item = mysql_fetch_array($res2)) AND ($counter++ < 3)){
             echo "<a href='index.php?cat=".$row['id']
                                   ."&sub=".$row_sub['id']
-                                  ."&item=".$row_item['id']."' class='submenu'>"
+                                  ."&item=".$row_item['id']."' class='submenu_nomargin'>"
                                   .$row_item['name']."</a><br>";
+                                  //.mb_substr($row_item['name'], 0, 50,'utf-8')."</a><br>";
           }
           if($overall>3){
-            echo "<a href='index.php?cat=".$row['id']
+            echo "<p align='right'><a href='index.php?cat=".$row['id']
                                   ."&sub=".$row_sub['id']."' class='submenu'>"
                                   .right_case($overall, "весь ", "все ", "все ").$overall
                                   .right_case($overall, " товар", " товара", " товаров")
-                                  ." группы >></a><br>";
+                                  ." группы >></a></p>";
           }
+          $col++;
         }
+        echo "</table>";
       }
     }
   } else {
