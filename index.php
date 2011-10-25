@@ -68,7 +68,13 @@
 		       This is the Navigation		 
 			   
   </div>
-	
+
+  <div id="cart">
+		 
+		       This is the Cart
+			   
+  </div>
+         
 	<div id="leftcolumn">
 <?php
   if (isset($_GET['cat'])) { //need to advance selected category
