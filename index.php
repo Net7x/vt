@@ -1,20 +1,9 @@
 <?php
   include "condb.php";
   mysql_query("SET character_set_results = 'utf8', character_set_client = 'utf8', character_set_connection = 'utf8', character_set_database = 'utf8', character_set_server = 'utf8'", $db);
-
-  function mysql_safe($query,$params=false) { 
-    if ($params) { 
-        foreach ($params as &$v) { $v = mysql_real_escape_string($v); }    # Escaping parameters 
-        # str_replace - replacing ? -> %s. %s is ugly in raw sql query 
-        # vsprintf - replacing all %s to parameters 
-        $sql_query = vsprintf( str_replace("?","'%s'",$query), $params );    
-        $sql_query = mysql_query($sql_query);    # Perfoming escaped query 
-    } else { 
-        $sql_query = mysql_query($query);    # If no params... 
-    } 
-
-    return ($sql_query); 
-  }
+  
+  $cur_ip = $_SERVER['REMOTE_ADDR'];
+  $host = gethostbyaddr($cur_ip); 
   
   function get_cat($subcat) {
     $res1 = mysql_safe("SELECT id_cat FROM subcat WHERE id=?", array($subcat));
@@ -126,6 +115,7 @@
           $cur_sub = $row['id_subcat'];
           $cur_item = $row['id'];
           $cur_name = $row['name'];
+          mysql_query("INSERT INTO hits (`subcat`,`item`,`host`,`ip`) VALUES('$cur_sub','$cur_item','$host','$cur_ip')");  
           $res1 = mysql_safe("SELECT id FROM items WHERE (id_subcat=?) AND (name=(SELECT MAX(name) FROM items WHERE (name<?) AND (id_subcat=?)))", 
                             array($cur_sub, $cur_name, $cur_sub,));
           if(mysql_num_rows($res1) > 0) {
