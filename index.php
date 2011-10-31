@@ -117,14 +117,28 @@
           $cur_name = $row['name'];
           mysql_query("INSERT INTO hits (`subcat`,`item`,`host`,`ip`) VALUES('$cur_sub','$cur_item','$host','$cur_ip')");  
           $res1 = mysql_safe("SELECT id FROM items WHERE (id_subcat=?) AND (name=(SELECT MAX(name) FROM items WHERE (name<?) AND (id_subcat=?)))", 
-                            array($cur_sub, $cur_name, $cur_sub,));
+                            array($cur_sub, $cur_name, $cur_sub));
           if(mysql_num_rows($res1) > 0) {
             $row1 = mysql_fetch_array($res1);
             echo "<td align='left' width=30%><a href='index.php?cat=".$cur_cat."&sub=".$cur_sub."&item=".$row1['id']."' class='pointer'>&lt;&lt;&lt; предыдущий товар</a></td>";
           } else {
             echo "<td align='left' width=30%> &nbsp; </td>";
           };
-          echo "<td align='center' id='cena'>".$row['price']." руб. "."</td>";
+          $res2 = mysql_safe("SELECT percent, round FROM subcat WHERE id = ?", array($cur_sub));
+          $row2 = mysql_fetch_array($res2);
+          $sell = 0;
+          if ($row2['percent'] > 0) {
+              $sell = $row['price'] * (1 + $row2['percent']/100);
+          }
+          if ($row2['round'] > 0) {
+              $sell = ceil($sell / $row2['round'])*$row2['round'];
+          }
+          if ($sell > 0) {
+              echo "<td align='center' id='cena'>".number_format($sell, 2, '.', ' ')." руб. "."</td>";
+          } else {
+              echo "<td align='center' id='cena'>"."-.--"." руб. "."</td>";
+          }
+          //echo "<td align='center' id='cena'>".$row['price']." руб. "."</td>";
           $res1 = mysql_safe("SELECT id FROM items WHERE (id_subcat=?) AND (name=(SELECT MIN(name) FROM items WHERE (name>?) AND (id_subcat=?)))", 
                             array($cur_sub, $cur_name, $cur_sub,));
           if(mysql_num_rows($res1) > 0) {
@@ -153,11 +167,14 @@
         $sub_id = $_GET['sub'];
         $res = mysql_safe("SELECT id, id_subcat, name, price FROM items WHERE id_subcat=?", array($sub_id));
         if(mysql_num_rows($res) > 0) {
+          $res2 = mysql_safe("SELECT name FROM subcat WHERE id = ?", array($sub_id));
+          $row2 = mysql_fetch_array($res2);
+          echo "<h3>".$row2['name']."</h3>";
           echo "<form method='GET' action='add.php'><table width=100% class='price'>";
           echo "<tr bgcolor='#ccccff' height=25 valign='middle'><th>Наименование</th><th width = 70>Цена</th><th width=70>Заказ</th></tr>";
           $counter = 0;
           while($row = mysql_fetch_array($res)) {
-            $res1 = mysql_safe("SELECT id_cat FROM subcat WHERE id=?", array($sub_id));
+            $res1 = mysql_safe("SELECT id_cat, percent, round FROM subcat WHERE id=?", array($sub_id));
             if(mysql_num_rows($res1) > 0) {
               $row1 = mysql_fetch_array($res1);
               $cat_id = $row1['id_cat'];
@@ -169,9 +186,21 @@
               }
               echo "<a href='index.php?cat=".$cat_id."&sub=".$row['id_subcat']."&item=".$row['id']."' class='item'>".$row['name']."</a>";
               echo "</td><td align='right' class='price'>";
-              echo number_format($row['price'], 2, '.', ' ');
+              $sell = 0;
+              if ($row1['percent'] > 0) {
+                  $sell = $row['price'] * (1 + $row1['percent']/100);
+              }
+              if ($row1['round'] > 0) {
+                  $sell = ceil($sell / $row1['round'])*$row1['round'];
+              }
+              if ($sell > 0) {
+                  echo number_format($sell, 2, '.', ' ');
+              } else {
+                  echo "-.--";
+              }
+              //echo number_format($row['price'], 2, '.', ' ');
               echo "</td><td align='center'>";
-              echo "<input type='text' name='qty[]' maxlength = 5 size = 3>";
+              echo "<input type='number' name='qty[]' maxlength = 5 size = 3>";
               echo "<input type='hidden' name='num[]' value=".$row['id'].">";
               echo "</td></tr>";
             }
