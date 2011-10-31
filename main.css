@@ -4,6 +4,13 @@ body {
  font-family: Arial, Helvetica, sans-serif;
  font-size: 13px;
 }
+
+h3 {
+margin: 5px 10px 5px 10px;
+color: darkBlue;
+font-size: 16px;
+}
+
 #wrapper { 
  margin: 0 auto;
  width: 920px;
@@ -24,6 +31,9 @@ body {
   position:relative;
   top: 70px;
   left: 450px;
+  color: #00B;
+  font-size: 18px;
+  font-weight: bold;
 }
 #navigation {
  float: left;
