@@ -5,6 +5,17 @@
   $cur_ip = $_SERVER['REMOTE_ADDR'];
   $host = gethostbyaddr($cur_ip); 
   
+  if (isset($_COOKIE['uid'])) {
+    $user = $_COOKIE['uid'];
+    if (md5($host) != $user) {
+      //setcookie('uid', md5($host), time()+31556926);
+      $user = $_COOKIE['uid'];
+    }
+  } else {
+    $user = md5($host);
+    setcookie('uid', md5($host), time()+31556926);
+  }
+  
   function get_cat($subcat) {
     $res1 = mysql_safe("SELECT id_cat FROM subcat WHERE id=?", array($subcat));
     if(mysql_num_rows($res1) > 0) {
@@ -15,30 +26,39 @@
     }
   }
 
-  function right_case($n, $var1, $var2, $var3) {
-    $digit = substr($n, -1);
-    if(substr($n,-2) >10 AND substr($n,-2)<19) {
-      return $var3;
+  
+  // this block adds item to user's cart
+  if (isset($_GET['action'])) {
+    if ($_GET['action'] == 'add') {
+      if (isset($_GET['cat'])&&isset($_GET['sub'])&&isset($_GET['item'])) {
+        $res = mysql_safe("SELECT * FROM items WHERE (id = ?) AND (id_subcat = ?)",
+                          array($_GET['item'],$_GET['sub']));
+        if (mysql_num_rows($res) > 0) {
+          $row = mysql_fetch_array($res);
+          $res2 = mysql_safe("SELECT percent, round FROM subcat WHERE id = ?", array($_GET['sub']));
+          $row2 = mysql_fetch_array($res2);
+          $sell = 0;
+          if ($row2['percent'] > 0) {
+              $sell = $row['price'] * (1 + $row2['percent']/100);
+          }
+          if ($row2['round'] > 0) {
+              $sell = ceil($sell / $row2['round'])*$row2['round'];
+          }
+          if ($sell > 0) {
+            mysql_safe("INSERT INTO cart (user, cat, sub, tov, name, kolvo, price, sum)
+                        VALUES (?,?,?,?,?,?,?,?)",
+                        array($user, $_GET['cat'], $_GET['sub'], $_GET['item'], $row['name'],
+                        1, $sell, $sell));  
+          }
+        }
+      }
     }
-    switch ($digit) {
-      case 1: 
-        return $var1;
-        break;
-      case 2:
-      case 3:
-      case 4:
-        return $var2;
-        break;
-      default:
-        return $var3;
-    }
-    
   }
 ?>
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<title>ВАМ ТОВАРЫ</title>
+<title>Вам Товары</title>
 <link rel="stylesheet" type="text/css" href="main.css">
 </head>
 
@@ -54,14 +74,26 @@
 	 
   <div id="navigation">
 		 
-		       This is the Navigation		 
+    <a href="index.php"> Каталог </a>
+    <a href="cart.php"> Заказы </a>
 			   
   </div>
 
   <div id="cart">
-		 
-		       This is the Cart
-			   
+    <?php
+    $res = mysql_safe("SELECT user, SUM(kolvo) as k, SUM(sum) as s FROM cart WHERE user = ? GROUP BY user", array($user));
+    $row = mysql_fetch_array($res);
+    if ($row['k'] == 0) {
+      echo "Ваша корзина пуста.";
+    } else {
+      echo "<a href='cart.php'>";
+      echo "В корзине ".$row['k']." ".right_case($row['k'],"товар", "товара", "товаров")
+          ." на сумму ".number_format($row['s'], 2, '.', ' ')." руб.";
+      echo "</a>";
+      
+    }
+    ?>
+		   
   </div>
          
 	<div id="leftcolumn">
@@ -134,7 +166,15 @@
               $sell = ceil($sell / $row2['round'])*$row2['round'];
           }
           if ($sell > 0) {
-              echo "<td align='center' id='cena'>".number_format($sell, 2, '.', ' ')." руб. "."</td>";
+              echo "<td align='center' id='cena'>".number_format($sell, 2, '.', ' ')." руб. ";
+              echo "<form action='index.php' method='GET'>";
+              echo "<input type='hidden' name='cat' value='".$cur_cat."'>";
+              echo "<input type='hidden' name='sub' value='".$cur_sub."'>";
+              echo "<input type='hidden' name='item' value='".$cur_item."'>";
+              echo "<input type='hidden' name='action' value='add'>";
+              echo "<input type='submit' value=' В корзину '>";
+              echo "</form>";
+              echo "</td>";
           } else {
               echo "<td align='center' id='cena'>"."-.--"." руб. "."</td>";
           }
@@ -200,7 +240,7 @@
               }
               //echo number_format($row['price'], 2, '.', ' ');
               echo "</td><td align='center'>";
-              echo "<input type='number' name='qty[]' maxlength = 5 size = 3>";
+              echo "<input type='text' name='qty[]' maxlength = 5 size = 3>";
               echo "<input type='hidden' name='num[]' value=".$row['id'].">";
               echo "</td></tr>";
             }

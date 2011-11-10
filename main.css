@@ -37,7 +37,7 @@ font-size: 16px;
 }
 #navigation {
  float: left;
- width: 600px;
+ width: 550px;
  color: #337;
  padding: 10px;
  border: 0px solid #ccc;
@@ -46,8 +46,9 @@ font-size: 16px;
 }
 
 #cart {
+ text-align: center;
  float: left;
- width: 275px;
+ width: 325px;
  color: #337;
  padding: 10px;
  border: 0px solid #ccc;
@@ -211,4 +212,79 @@ a.pointer:active {text-decoration:none;color: #55A;}
 
 .nowrap {
   white-space: nowrap;
+}
+
+.plu {
+  background: url("img/plu.png");
+  display: block;
+  cursor:pointer;
+  width: 20px;
+  height: 20px;
+  border: none;
+}
+
+.plu:hover {
+  background: url("img/pluh.png");
+}
+.min {
+  background: url("img/min.png");
+  display: block;
+  cursor:pointer;
+  width: 20px;
+  height: 20px;
+  border: none;
+}
+
+.min:hover {
+  background: url("img/minh.png");
+}
+.del {
+  background: url("img/del.png");
+  display: block;
+  cursor:pointer;
+  width: 20px;
+  height: 20px;
+  border: none;
+}
+
+.del:hover {
+  background: url("img/delh.png");
+}
+
+#overall {
+  text-align: right;
+  font-size: 14px;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.order {
+  position: relative;
+  left: 150px;
+  display: block;
+  width: 350px;
+  background: #ddddff;
+  border: 1px #CCF solid;
+  color: darkblue;
+}
+
+.torder {
+  margin: 8px 5px 8px 5px;
+}
+
+.inp {
+  position: absolute;
+  left: 60px;
+  width: 280px;
+}
+
+.submit {
+  display: inline-block;
+  background: #eeeeff;
+  padding: 3px 5px 3px 5px;
+  border: 1px #CCF solid;
+  font-weight: bold;
+  font-size: 14px;
+  color: darkblue;
+  cursor: pointer;
 }
